@@ -1,0 +1,107 @@
+<hr>
+    
+    <h3>Generate API Key</h3>
+    <p>Masukkan ID User (dari hasil 'Save User' di atas). 
+       Setiap kali tombol 'Generate' diklik, key baru akan dibuat dan key lama akan dinonaktifkan.
+    </p>
+    <div>
+        <label>User ID:</label>
+        <input type="number" id="userIdForGen" placeholder="Contoh: 1">
+    </div>
+    <button id="btnGenerate">Generate New Key</button>
+    
+    <h4>Key Baru Anda:</h4>
+    <pre id="generateResult"></pre>
+
+    <hr>
+    
+    <button id="btnGetAllKeys">Get All My Keys</button>
+    <h4>Semua Key Milik User (ID: <span id="currentUserId">...</span>):</h4>
+    <pre id="allKeysResult"></pre>
+
+
+    <script>
+        // --- Logic Tombol Save ---
+        document.getElementById('btnSave').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const firstname = document.getElementById('firstname').value;
+            const lastname = document.getElementById('lastname').value;
+            const resultEl = document.getElementById('saveResult');
+
+            try {
+                const response = await fetch('/api/user/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, firstname, lastname })
+                });
+                
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+
+                if (data.user && data.user.id) {
+                    document.getElementById('userIdForGen').value = data.user.id;
+                    document.getElementById('currentUserId').textContent = data.user.id; // Update label
+                }
+
+            } catch (error) {
+                resultEl.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        // --- Logic Tombol Generate ---
+        document.getElementById('btnGenerate').addEventListener('click', async () => {
+            const userId = document.getElementById('userIdForGen').value;
+            const resultEl = document.getElementById('generateResult');
+
+            if (!userId) {
+                resultEl.textContent = "Masukkan User ID terlebih dahulu.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/user/${userId}/generate-key`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                resultEl.textContent = JSON.stringify(data, null, 2);
+
+                // Otomatis refresh daftar semua key
+                document.getElementById('btnGetAllKeys').click();
+
+            } catch (error) {
+                resultEl.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        // --- Logic Tombol Get All My Keys ---
+        document.getElementById('btnGetAllKeys').addEventListener('click', async () => {
+            const userId = document.getElementById('userIdForGen').value;
+            const resultEl = document.getElementById('allKeysResult');
+            document.getElementById('currentUserId').textContent = userId || "...";
+
+
+            if (!userId) {
+                resultEl.textContent = "Masukkan User ID terlebih dahulu.";
+                return;
+            }
+
+            try {
+                // Kita panggil rute /api/user/:userId yang sudah kita buat
+                const response = await fetch(`/api/user/${userId}`);
+                const data = await response.json();
+                
+                // Data user akan berisi array 'apiKeys'
+                if (data.apiKeys) {
+                    resultEl.textContent = JSON.stringify(data.apiKeys, null, 2);
+                } else {
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                }
+
+            } catch (error) {
+                resultEl.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
