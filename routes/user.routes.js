@@ -1,13 +1,13 @@
 const controller = require("../controllers/user.controller");
 
 module.exports = function(app) {
-  // Rute untuk save (create/update) user.
-  // Kita gunakan POST untuk create/update berdasarkan email di body
+
+  // === ROUTE ASLI ===
   app.post("/api/user/save", controller.saveUser);
-
-  // Rute untuk mendapatkan detail user (termasuk apikey-nya)
   app.get("/api/user/:userId", controller.getUserDetails);
-
-  // Rute untuk generate API Key untuk user tertentu
   app.post("/api/user/:userId/generate-key", controller.generateApiKey);
+
+  // === ROUTE TAMBAHAN UNTUK FLOW: Generate dulu → Save ===
+  app.post("/api/generate-temp-key", controller.generateTempKey);
+  app.post("/api/user/save-with-key", controller.saveUserWithKey);
 };

@@ -4,121 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
+
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: grid;
-            place-items: center;
-            min-height: 90vh;
-            background-color: #f4f7f6;
-            color: #333;
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+
         .container {
             width: 100%;
-            max-width: 500px;
-            margin: 20px;
+            max-width: 480px;
             padding: 30px;
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            color: #fff;
         }
+
         h2 {
             text-align: center;
             margin-top: 0;
-            color: #1a1a1a;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
+            font-size: 26px;
             font-weight: 600;
         }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #e8e8e8;
+        }
+
         .form-group input {
             width: 100%;
             padding: 12px;
-            box-sizing: border-box; /* Ini penting agar padding tidak merusak layout */
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            background: rgba(255,255,255,0.25);
+            color: #fff;
+            font-size: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
         }
+
+        .form-group input::placeholder {
+            color: #e9e9e9;
+        }
+
         .api-group {
             display: flex;
-            align-items: center;
             gap: 10px;
         }
-        .api-group input {
-            background-color: #eee;
-        }
+
         .btn {
-            width: 100%;
             padding: 14px;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: 0.2s ease;
         }
+
         .btn-primary {
-            background-color: #007bff;
+            width: 100%;
+            background: linear-gradient(135deg, #4e54c8, #008cff);
             color: white;
         }
+
         .btn-primary:hover {
-            background-color: #0056b3;
+            opacity: 0.85;
         }
-        .btn-secondary {
-            flex-shrink: 0; /* Mencegah tombol "Generate" mengecil */
-            width: auto;
+
+        .btn-green {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #fff;
             padding: 12px 15px;
-            background-color: #28a745;
-            color: white;
         }
-        .btn-secondary:hover {
-            background-color: #218838;
+
+        .btn-green:hover {
+            opacity: 0.85;
         }
+
         pre {
-            background: #f4f4f4;
+            background: rgba(0,0,0,0.4);
             padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
+            border-radius: 10px;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            white-space: pre-wrap;
+            word-wrap: break-word;
             font-size: 12px;
-            white-space: pre-wrap; /* Agar teks tidak keluar-kotak */
-            word-wrap: break-word; /* Memaksa teks panjang untuk pindah baris */
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
         <h2>User Settings</h2>
-        
+
         <input type="hidden" id="hiddenUserId">
 
+        <!-- API KEY -->
         <div class="form-group">
             <label for="apiKeyDisplay">API Key</label>
             <div class="api-group">
-                <input type="text" id="apiKeyDisplay" placeholder="Klik 'Save' untuk memuat / 'Generate' untuk membuat..." readonly>
-                <button class="btn btn-secondary" id="btnGenerate">Generate</button>
+                <input type="text" id="apiKeyDisplay" placeholder="Generate API key dulu..." readonly>
+                <button class="btn btn-green" id="btnGenerate">Generate</button>
             </div>
         </div>
 
+        <!-- Firstname -->
         <div class="form-group">
             <label for="firstname">First Name</label>
             <input type="text" id="firstname" placeholder="John">
         </div>
-        
+
+        <!-- Lastname -->
         <div class="form-group">
             <label for="lastname">Last Name</label>
             <input type="text" id="lastname" placeholder="Doe">
         </div>
-        
+
+        <!-- Email -->
         <div class="form-group">
             <label for="email">Email</label>
             <input type="email" id="email" placeholder="john.doe@example.com">
         </div>
 
+        <!-- Save -->
         <div class="form-group">
             <button class="btn btn-primary" id="btnSave">Save User</button>
         </div>
@@ -126,124 +154,80 @@
         <pre id="resultArea"></pre>
     </div>
 
-    <script>
-        // --- Referensi Elemen ---
-        const btnSave = document.getElementById('btnSave');
-        const btnGenerate = document.getElementById('btnGenerate');
-        
-        const inputEmail = document.getElementById('email');
-        const inputFirstname = document.getElementById('firstname');
-        const inputLastname = document.getElementById('lastname');
-        
-        const displayApiKey = document.getElementById('apiKeyDisplay');
-        const hiddenUserId = document.getElementById('hiddenUserId');
-        const resultArea = document.getElementById('resultArea');
+<script>
+    let tempGeneratedKey = null; // <-- variabel global penyimpan key
 
-        // --- Logika Tombol Save ---
-        btnSave.addEventListener('click', async () => {
-            const email = inputEmail.value;
-            const firstname = inputFirstname.value;
-            const lastname = inputLastname.value;
+    const btnSave = document.getElementById('btnSave');
+    const btnGenerate = document.getElementById('btnGenerate');
 
-            if (!email) {
-                setResult("Error: Email wajib diisi untuk menyimpan.", true);
-                return;
-            }
+    const inputEmail = document.getElementById('email');
+    const inputFirstname = document.getElementById('firstname');
+    const inputLastname = document.getElementById('lastname');
 
-            try {
-                const saveResponse = await fetch('/api/user/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, firstname, lastname })
-                });
+    const displayApiKey = document.getElementById('apiKeyDisplay');
+    const hiddenUserId = document.getElementById('hiddenUserId');
+    const resultArea = document.getElementById('resultArea');
 
-                const data = await saveResponse.json();
-                
-                if (!saveResponse.ok) {
-                    throw new Error(data.message || 'Gagal menyimpan user.');
-                }
+    // === SAVE USER DENGAN API KEY ===
+    btnSave.addEventListener('click', async () => {
+        const email = inputEmail.value;
+        const firstname = inputFirstname.value;
+        const lastname = inputLastname.value;
 
-                setResult(`Sukses: ${data.message}`);
-                
-                const userId = data.user.id;
-                hiddenUserId.value = userId;
+        if (!email) return setResult("Error: Email wajib diisi.", true);
 
-                // Ambil detail user (termasuk semua keys)
-                await loadUserKeys(userId);
-
-            } catch (error) {
-                setResult(`Error: ${error.message}`, true);
-            }
-        });
-
-        // --- Logika Tombol Generate ---
-        btnGenerate.addEventListener('click', async () => {
-            const userId = hiddenUserId.value;
-
-            if (!userId) {
-                setResult("Error: Simpan data user (via email) terlebih dahulu sebelum generate key.", true);
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/user/${userId}/generate-key`, {
-                    method: 'POST'
-                });
-                
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Gagal generate key.');
-                }
-                
-                displayApiKey.value = data.apiKey.key;
-                setResult("Sukses: Key baru telah di-generate. Key lama dinonaktifkan.");
-
-            } catch (error) {
-                setResult(`Error: ${error.message}`, true);
-            }
-        });
-
-        // --- Fungsi Bantuan ---
-
-        async function loadUserKeys(userId) {
-            try {
-                const response = await fetch(`/api/user/${userId}`);
-                const userData = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(userData.message || 'Gagal memuat detail user.');
-                }
-
-                inputFirstname.value = userData.firstname || '';
-                inputLastname.value = userData.lastname || '';
-                inputEmail.value = userData.email || '';
-
-                // === INI PERBAIKANNYA ===
-                // 1. Kita cek 'userData.apikeys' (huruf kecil)
-                // 2. Kita beri '|| []' untuk memastikan ini adalah array (walaupun kosong)
-                const keysArray = userData.apikeys || []; 
-                
-                // 3. Sekarang .find() aman dijalankan di 'keysArray'
-                const activeKey = keysArray.find(key => key.outofdate === false);
-                // === AKHIR PERBAIKAN ===
-
-                if (activeKey) {
-                    displayApiKey.value = activeKey.key;
-                } else {
-                    displayApiKey.value = "Belum ada key aktif.";
-                }
-
-            } catch (error) {
-                 setResult(`Error saat memuat keys: ${error.message}`, true);
-            }
+        if (!tempGeneratedKey) {
+            return setResult("Error: Generate API Key dulu sebelum Save User.", true);
         }
 
-        function setResult(message, isError = false) {
-            resultArea.textContent = message;
-            resultArea.style.color = isError ? '#d9534f' : '#28a745';
-            resultArea.style.borderColor = isError ? '#d9534f' : '#28a745';
+        try {
+            const response = await fetch('/api/user/save', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email,
+                    firstname,
+                    lastname,
+                    key: tempGeneratedKey   // <-- KIRIM KEY KE BACKEND
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            hiddenUserId.value = data.user.id;
+
+            setResult("Sukses: User + API Key tersimpan. Cek Admin Dashboard.");
+
+            tempGeneratedKey = null; // reset setelah sukses
+        } catch (err) {
+            setResult("Error: " + err.message, true);
         }
-    </script>
-</body>
-</html>
+    });
+
+    // === GENERATE API KEY ===
+    btnGenerate.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/generate-temp-key', {
+                method: 'POST'
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            tempGeneratedKey = data.key; // <-- SIMPAN KE VARIABEL GLOBAL
+            displayApiKey.value = data.key;
+
+            setResult("Sukses: API Key berhasil digenerate. Sekarang tekan Save User.");
+
+        } catch (err) {
+            setResult("Error: " + err.message, true);
+        }
+    });
+
+    function setResult(msg, isError = false) {
+        resultArea.textContent = msg;
+        resultArea.style.color = isError ? "#d9534f" : "#28a745";
+        resultArea.style.borderColor = isError ? "#d9534f" : "#28a745";
+    }
+</script>

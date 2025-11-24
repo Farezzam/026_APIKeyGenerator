@@ -59,12 +59,16 @@ exports.login = async (req, res) => {
 // (getListUsers)
 exports.getListUsers = async (req, res) => {
   try {
-    // === PERUBAHAN DI SINI ===
-    // Kita tambahkan 'include' untuk mengambil data apikeys yang berelasi
     const users = await User.findAll({
-        include: [db.apiKey] // Ini akan menghasilkan array 'apikeys' di data user
+      include: [
+        {
+          model: ApiKey,
+          as: "apikeys",        
+          attributes: ["id", "key", "outofdate"]
+        }
+      ]
     });
-    // === AKHIR PERUBAHAN ===
+
     res.status(200).send(users);
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -75,9 +79,10 @@ exports.getListUsers = async (req, res) => {
 exports.getListApiKeys = async (req, res) => {
   try {
     const keys = await ApiKey.findAll({
-      include: [{ 
+      include: [{
         model: db.user,
-        attributes: ['email', 'firstname'] 
+        as: "user",
+        attributes: ['email', 'firstname', 'lastname']
       }]
     });
     
@@ -120,7 +125,10 @@ exports.createUser = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.userId, {
-      include: [db.apiKey]
+      include: [{
+        model: ApiKey,
+        as: "apikeys"
+      }]
     });
     if (!user) {
       return res.status(404).send({ message: "User not found." });

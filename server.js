@@ -1,36 +1,35 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path"); // <-- Pastikan ini ada di atas
+const path = require("path");
 require('dotenv').config();
 
-const app = express(); // <-- INI YANG HILANG. 'app' dibuat di sini
+const app = express();
 
-// Middleware harus didefinisikan SETELAH 'app' dibuat
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// === Sinkronisasi Database ===
+// === Database ===
 const db = require("./models");
-// Pastikan baris sync di-komentar (//) agar tidak me-reset data
-// db.sequelize.sync({ force: true }).then(() => {
-//   console.log('Drop and re-sync db.');
-// });
 
 // === Rute API ===
-// Rute ini menggunakan 'app', jadi harus ada setelah 'app' dibuat
+// Penting: LETAKKAN API ROUTES SEBELUM STATIC !!!
 require('./routes/admin.routes')(app);
 require('./routes/user.routes')(app);
 
-// === Menyajikan Tampilan Web (HTML Sederhana) ===
-// Baris ini juga menggunakan 'app' dan 'path'
-app.use(express.static(path.join(__dirname, 'views')));
+// ====================================
+// STATIC FILE JANGAN MENANGKAP /api/**
+// ====================================
 
+// Batasi supaya hanya file di /views saja yang diakses
+app.use("/page", express.static(path.join(__dirname, "views")));
+
+// Routing file HTML manual
 app.get('/user-page', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'user.html'));
 });
 
-// RUTE ADMIN BARU (DIPISAH)
 app.get('/admin-login-page', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin-login.html'));
 });
@@ -43,12 +42,12 @@ app.get('/admin-page', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'admin.html'));
 });
 
-// Rute dasar
+// Default route API
 app.get("/", (req, res) => {
   res.json({ message: "Selamat datang di API service." });
 });
 
-// Set port dan jalankan server
+// Jalankan server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server berjalan di port ${PORT}. http://localhost:${PORT}`);
